@@ -1,0 +1,52 @@
+DOUBLY - THINGS TO DO NEXT
+==========================
+
+Already done (not listed here): commas in big numbers + BigInt,
+scratch paper not covering Submit on small screens, Escape key.
+
+
+1. LEARN GIT (do this one first)
+--------------------------------
+What:  Save "checkpoints" of your project as you go.
+Why:   If a change ever breaks the game, you can go back to the last
+       version that worked. It also lets you put the game on GitHub
+       to show people, or to get a free website with GitHub Pages.
+How:   The first steps, typed in the VS Code terminal in this folder:
+
+         git init                     start tracking this folder
+         git add .                    pick all files for the checkpoint
+         git commit -m "First save"   make the checkpoint
+
+       After every new feature or fix, do "git add ." and
+       "git commit -m "what you changed"" again.
+       "git log" shows every checkpoint you've made.
+
+
+2. TRY THE <dialog> ELEMENT FOR POPUPS
+--------------------------------------
+What:  HTML has a built-in popup tag: <dialog>.
+Why:   Right now the popups are made by hand: the .overlay CSS, the
+       "inert" trick that blocks the game behind them, and the Escape
+       key code. <dialog> does all of that for you, and it also
+       keeps the Tab key from leaving the popup.
+How:   - Change <div id="quit-confirm" class="overlay hidden"> into
+         <dialog id="quit-confirm">.
+       - In JS, open it with  quitConfirm.showModal()
+         and close it with   quitConfirm.close()
+       - Style the dark background behind it with  dialog::backdrop
+       Practice on the Quit popup first, since it's the simpler one.
+
+
+3. THE LEADERBOARD CAN BE CHEATED
+---------------------------------
+What:  Anyone can open DevTools (F12) and type  round = 500  in the
+       Console, or edit the saved scores in Application > Local Storage.
+Why:   All the game code runs in the player's own browser, and people
+       can change anything in their own browser. Every game that only
+       runs in the browser has this problem.
+How:   The only real fix is a server: the game sends each answer to it,
+       the server checks the math, and the server keeps the
+       leaderboard. That's a bigger project (Node.js, or a service
+       like Firebase or Supabase). Good to learn later; not needed for
+       a personal project, where the leaderboard only lives on your
+       own computer anyway.

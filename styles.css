@@ -1,0 +1,654 @@
+/* Colors taken straight from the logo, so the whole game matches it.
+   Change a color here and it changes everywhere it's used. */
+:root {
+    --bg: #2a1145;
+    --ink: #3a0868;
+    --yellow: #ffe600;
+    --orange: #ffb300;
+    --pink: #ff5fd2;
+    --cream: #fff4a8;
+    --green: #17a34a;
+    --red: #e0245e;
+}
+
+/* Padding and borders count inside an element's width, so sizes are predictable */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Fredoka', 'Arial Rounded MT Bold', sans-serif;
+    color: var(--ink);
+    background-color: var(--bg);
+    /* One small dot, repeated every 28px, makes a polka-dot pattern */
+    background-image: radial-gradient(rgba(255, 255, 255, 0.08) 2px, transparent 2px);
+    background-size: 28px 28px;
+}
+
+/* ---------- Title screen ---------- */
+
+.title-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 16px 16px 100px;
+    gap: 80px;
+}
+
+.title-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.title-screen-logo {
+    width: min(560px, 90vw);
+    animation: float 3s ease-in-out infinite;
+}
+
+/* ---------- Buttons ---------- */
+
+.play-button {
+    font-family: inherit;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--ink);
+    background-color: var(--yellow);
+    padding: 16px 50px;
+    border: 4px solid var(--ink);
+    border-radius: 40px;
+    /* A shadow with no blur looks like a solid "3D" edge under the button */
+    box-shadow: 0 8px 0 var(--pink);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.play-button:hover {
+    transform: translateY(-3px) rotate(-3deg);
+    box-shadow: 0 11px 0 var(--pink);
+}
+
+/* Move down and shrink the shadow at the same time = it feels pressed in */
+.play-button:active {
+    transform: translateY(6px);
+    box-shadow: 0 2px 0 var(--pink);
+}
+
+/* ---------- Game screen ---------- */
+
+.game-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 16px;
+}
+
+/* width: auto lets the card grow to fit the question. It starts at 420px (or the
+   whole screen on phones, if that's smaller) and can stretch up to the full screen. */
+.card {
+    width: auto;
+    min-width: min(420px, 100%);
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 32px 24px;
+    background-color: var(--cream);
+    border: 5px solid var(--ink);
+    border-radius: 28px;
+    box-shadow: 10px 10px 0 var(--pink);
+    transform: rotate(-1.5deg);
+}
+
+.round-badge {
+    margin: 0;
+    padding: 6px 18px;
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    background-color: var(--pink);
+    border: 3px solid var(--ink);
+    border-radius: 999px;
+    transform: rotate(3deg);
+}
+
+/* nowrap keeps the whole question on one line, which is what makes the card grow.
+   max-width: 100% stops it at the card's edge, so JS can tell when it doesn't fit. */
+#question {
+    max-width: 100%;
+    margin: 0;
+    font-size: clamp(32px, 9vw, 52px);
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+    /* Only used if JS gives up shrinking and lets it wrap (see fitQuestion) */
+    overflow-wrap: anywhere;
+}
+
+/* On wide screens the scratch paper sits on the right, so keep the card in the
+   space to its left instead of sliding underneath it */
+.game-screen:has(#scratch:not(.hidden)) {
+    padding-right: calc(max(35vw, 340px) + 32px);
+}
+
+/* One rule styles both text boxes, so they always match */
+#answer,
+#player-name {
+    width: 100%;
+    padding: 12px;
+    font-family: inherit;
+    font-size: 30px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--ink);
+    background-color: white;
+    border: 4px dashed var(--ink);
+    border-radius: 18px;
+    outline: none;
+}
+
+#answer:focus,
+#player-name:focus {
+    border-style: solid;
+    border-color: var(--pink);
+}
+
+#message {
+    margin: 0;
+    min-height: 1.4em; /* keeps space reserved so the card doesn't jump */
+    font-size: 26px;
+    font-weight: 700;
+}
+
+#message.correct {
+    color: var(--green);
+}
+
+#message.wrong {
+    color: var(--red);
+}
+
+/* ---------- Scratch paper button (floating in the corner) ---------- */
+
+/* A button with all its default looks stripped away, so only what's inside shows */
+.scratch-toggle {
+    position: fixed;
+    right: 56px;
+    bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    font-family: inherit;
+    background: none;
+    border: none;
+    cursor: pointer;
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Keyboard users still need to see when it's selected */
+.scratch-toggle:focus-visible {
+    outline: 4px dashed var(--yellow);
+    outline-offset: 10px;
+    border-radius: 16px;
+}
+
+.scratch-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 44px;
+    font-weight: 700;
+    line-height: 0.95;
+}
+
+/* Same recipe as the logo: yellow letters, thick purple outline, pink shadow.
+   It's a class of its own so any text can use it: add class="funky" */
+.funky {
+    color: var(--yellow);
+    -webkit-text-stroke: 10px var(--ink);
+    paint-order: stroke fill; /* draw the outline first, so it doesn't eat into the letters */
+    filter: drop-shadow(4px 5px 0 var(--pink));
+}
+
+.scratch-label span:first-child {
+    transform: rotate(-8deg);
+}
+
+.scratch-label span:last-child {
+    color: var(--orange);
+    transform: rotate(5deg) translateX(14px);
+}
+
+.scratch-arrow {
+    width: 80px;
+    height: 50px;
+    color: white; /* the SVG uses stroke="currentColor", so it picks this up */
+    animation: nudge 1s ease-in-out infinite;
+}
+
+/* A tiny version of the real sheet */
+.notepad {
+    width: 110px;
+    height: 130px;
+    background-color: white;
+    background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0 19px,
+        #c9d6ea 19px 21px
+    );
+    border: 4px solid var(--ink);
+    border-radius: 12px;
+    box-shadow: 6px 6px 0 var(--pink);
+    transform: rotate(4deg);
+    transition: transform 0.15s;
+}
+
+/* Hovering anywhere on the button wiggles the notepad */
+.scratch-toggle:hover .notepad {
+    transform: rotate(-4deg) scale(1.1);
+}
+
+.scratch-toggle:active .notepad {
+    transform: rotate(0deg) scale(0.95);
+}
+
+/* On phones there's no room for the words, so just show the little notepad */
+@media (max-width: 700px) {
+    .scratch-toggle {
+        right: 16px;
+        bottom: 16px;
+    }
+
+    .scratch-label,
+    .scratch-arrow {
+        display: none;
+    }
+
+    .notepad {
+        width: 64px;
+        height: 76px;
+    }
+}
+
+/* ---------- Side panels (scratch paper + leaderboard) ---------- */
+
+/* Shared by the scratch paper AND the leaderboard, so both panels match.
+   position: fixed pins it to the screen, so it doesn't move the card around. */
+.side-panel {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    bottom: 16px;
+    width: 35vw;
+    min-width: 340px;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border: 5px solid var(--ink);
+    border-radius: 20px;
+    box-shadow: -10px 10px 0 var(--pink);
+    overflow: hidden; /* keeps the canvas inside the rounded corners */
+}
+
+.scratch-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    border-bottom: 3px solid var(--ink);
+}
+
+.tool {
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    background-color: white;
+    padding: 6px 12px;
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.tool:hover {
+    background-color: var(--cream);
+}
+
+.tool.active {
+    background-color: var(--yellow);
+}
+
+.tool:disabled {
+    opacity: 0.35;
+    background-color: white;
+    cursor: default;
+}
+
+/* margin-left: auto eats all the free space on its left, pushing it to the far right */
+.close {
+    margin-left: auto;
+}
+
+.colors {
+    display: flex;
+    gap: 6px;
+}
+
+.color {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 3px solid var(--ink);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* Two stacked shadows = a white gap, then a pink ring around the chosen color */
+.color.active {
+    box-shadow: 0 0 0 3px white, 0 0 0 6px var(--pink);
+}
+
+/* The notebook lines: transparent for 31px, then a 1px line, repeated down the page */
+.scratch-paper {
+    flex: 1;
+    position: relative;
+    background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0 31px,
+        #c9d6ea 31px 32px
+    );
+}
+
+/* The canvas sits on top of the lines and fills the paper exactly */
+#scratch-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+    touch-action: none; /* on phones, drawing shouldn't scroll the page */
+}
+
+/* On smaller screens there's no room beside the card, so use the bottom part instead */
+@media (max-width: 1100px) {
+    .side-panel {
+        top: auto;
+        left: 16px;
+        width: auto;
+        min-width: 0;
+        height: 45vh;
+    }
+
+    /* :has() checks what's INSIDE an element. Read it as: "a game screen that has
+       an open scratch paper". Then the card moves to the top and shrinks a bit,
+       and the bottom padding keeps it out from under the panel. */
+    .game-screen:has(#scratch:not(.hidden)) {
+        align-items: flex-start;
+        padding-top: 80px; /* room for the Quit button */
+        padding-right: 16px; /* the panel is at the bottom here, not the right */
+        padding-bottom: calc(45vh + 32px);
+    }
+
+    .game-screen:has(#scratch:not(.hidden)) .card {
+        gap: 10px;
+        padding: 16px;
+    }
+
+    .game-screen:has(#scratch:not(.hidden)) #question {
+        font-size: 28px;
+    }
+
+    .game-screen:has(#scratch:not(.hidden)) #answer {
+        font-size: 22px;
+        padding: 8px;
+    }
+
+    .game-screen:has(#scratch:not(.hidden)) #submit {
+        font-size: 20px;
+        padding: 8px 28px;
+    }
+
+    .game-screen:has(#scratch:not(.hidden)) #message {
+        font-size: 18px;
+    }
+}
+
+/* ---------- Leaderboard ---------- */
+
+.leaderboard-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    background-color: var(--cream);
+    border-bottom: 3px solid var(--ink);
+}
+
+.leaderboard-title {
+    margin: 0;
+    font-size: 36px;
+    transform: rotate(-3deg);
+}
+
+/* flex: 1 fills the rest of the panel; overflow-y: auto adds a scrollbar only if the list gets too long */
+.leaderboard-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+/* list-style: none removes the automatic "1. 2. 3." so we can draw our own */
+#leaderboard-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#leaderboard-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    font-weight: 700;
+    background-color: white;
+    border: 3px solid var(--ink);
+    border-radius: 14px;
+}
+
+/* place-items: center in a grid is the shortest way to center something both ways */
+.score-rank {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    background-color: var(--yellow);
+    border: 3px solid var(--ink);
+    border-radius: 50%;
+}
+
+/* flex: 1 takes all the leftover room; a name too long for it ends in "..." */
+.score-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.score-rounds {
+    white-space: nowrap;
+}
+
+.score-size {
+    padding: 2px 10px;
+    font-size: 14px;
+    color: white;
+    white-space: nowrap;
+    background-color: var(--pink);
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+}
+
+#leaderboard-empty {
+    margin: 0;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* ---------- Celebration popup ---------- */
+
+/* Covers the whole screen with a see-through dark layer, and centers the popup.
+   z-index puts it above everything else, including the scratch paper. */
+.overlay {
+    position: fixed;
+    inset: 0; /* short for top, right, bottom and left all being 0 */
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    background-color: rgba(20, 5, 40, 0.75);
+}
+
+.popup {
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 32px 24px;
+    text-align: center;
+    background-color: var(--cream);
+    border: 5px solid var(--ink);
+    border-radius: 28px;
+    box-shadow: 10px 10px 0 var(--pink);
+    animation: pop-in 0.4s ease-out;
+}
+
+.popup-title {
+    margin: 0;
+    font-size: 52px;
+    font-weight: 700;
+    transform: rotate(-4deg);
+}
+
+.popup-text {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.popup-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+}
+
+.popup .play-button {
+    font-size: 22px;
+    padding: 12px 28px;
+}
+
+.play-button.secondary {
+    background-color: white;
+}
+
+/* Red for the button that can't be undone, so it stands out as the risky one */
+.play-button.danger {
+    color: white;
+    background-color: var(--red);
+}
+
+.quit-button {
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    font-size: 20px;
+    padding: 10px 26px;
+}
+
+/* ---------- Credit (watermark) ---------- */
+
+/* Pinned to the bottom middle of every screen. It's the FIRST thing in <body>,
+   so the panels and popups (which come later) are drawn on top of it.
+   pointer-events: none lets clicks pass straight through it. */
+.credit {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    color: white;
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+/* ---------- Animations ---------- */
+
+.card.pop {
+    animation: pop 0.3s ease;
+}
+
+.card.shake {
+    animation: shake 0.3s ease;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50%      { transform: translateY(-14px) rotate(2deg); }
+}
+
+@keyframes nudge {
+    0%, 100% { transform: translateX(0); }
+    50%      { transform: translateX(8px); }
+}
+
+@keyframes pop-in {
+    0%   { transform: scale(0.6) rotate(-6deg); opacity: 0; }
+    70%  { transform: scale(1.05) rotate(1deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+/* The card's rotate(-1.5deg) is repeated here because an animation's
+   transform replaces the normal one while it plays */
+@keyframes pop {
+    0%, 100% { transform: rotate(-1.5deg) scale(1); }
+    50%      { transform: rotate(1deg) scale(1.06); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: rotate(-1.5deg) translateX(0); }
+    25%      { transform: rotate(-1.5deg) translateX(-12px); }
+    75%      { transform: rotate(-1.5deg) translateX(12px); }
+}
+
+/* Respect people who turn off animations in their system settings */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* Kept LAST on purpose: when two rules are equally specific, the later
+   one wins. If this came before .game-screen, display: flex would win. */
+.hidden {
+    display: none;
+}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <title>Doubly</title>
+</head>
+<body>
+    <footer class="credit">© 2026 John Gabriel Sunga</footer>
+
+    <div class="title-screen">
+        <img class="title-screen-logo" src="doubly-logo.png" alt="Doubly">
+        <div class="title-buttons">
+            <button id="play" class="play-button">Play</button>
+            <button id="leaderboard-toggle" class="play-button secondary">Leaderboards</button>
+        </div>
+
+        <div id="leaderboard" class="side-panel hidden">
+            <div class="leaderboard-header">
+                <h2 class="leaderboard-title funky">Leaderboard</h2>
+                <button id="leaderboard-close" class="tool close" aria-label="Close leaderboard">✕</button>
+            </div>
+            <div class="leaderboard-body">
+                <ol id="leaderboard-list"></ol>
+                <p id="leaderboard-empty">No scores yet. Clear 10 rounds to get on here!</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-screen hidden">
+        <button id="quit" class="play-button secondary quit-button">Quit</button>
+
+        <div class="card">
+            <p id="round" class="round-badge">Round 1</p>
+            <p id="question">1 + 1 = ?</p>
+            <input id="answer" type="text" inputmode="numeric" autocomplete="off" placeholder="Your answer">
+            <button id="submit" class="play-button">Submit</button>
+            <p id="message" aria-live="polite"></p>
+        </div>
+
+        <button id="scratch-toggle" class="scratch-toggle" aria-label="Open scratch paper">
+            <span class="scratch-label">
+                <span class="funky">Scratch</span>
+                <span class="funky">Paper</span>
+            </span>
+            <svg class="scratch-arrow" viewBox="0 0 80 50" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 32 Q 40 8 72 26" />
+                <path d="M58 14 L72 26 L56 34" />
+            </svg>
+            <span class="notepad"></span>
+        </button>
+
+        <div id="scratch" class="side-panel hidden">
+            <div class="scratch-toolbar">
+                <button class="tool active" data-tool="pencil">Pencil</button>
+                <button class="tool" data-tool="eraser">Eraser</button>
+                <button id="undo" class="tool" disabled>Undo</button>
+                <button id="redo" class="tool" disabled>Redo</button>
+                <button id="clear" class="tool">Clear</button>
+                <div class="colors">
+                    <button class="color active" data-color="#222222" style="background-color: #222222" aria-label="Black"></button>
+                    <button class="color" data-color="#2563eb" style="background-color: #2563eb" aria-label="Blue"></button>
+                    <button class="color" data-color="#e0245e" style="background-color: #e0245e" aria-label="Red"></button>
+                    <button class="color" data-color="#17a34a" style="background-color: #17a34a" aria-label="Green"></button>
+                    <button class="color" data-color="#9333ea" style="background-color: #9333ea" aria-label="Purple"></button>
+                </div>
+                <button id="scratch-close" class="tool close" aria-label="Close scratch paper">✕</button>
+            </div>
+            <div class="scratch-paper">
+                <canvas id="scratch-canvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div id="celebration" class="overlay hidden">
+        <div class="popup">
+            <p id="popup-title" class="popup-title funky">10 Rounds!</p>
+            <p id="popup-text" class="popup-text"></p>
+            <input id="player-name" type="text" maxlength="16" placeholder="Your name">
+            <div class="popup-buttons">
+                <button id="save-score" class="play-button">Save &amp; restart</button>
+                <button id="keep-going" class="play-button secondary">Keep going</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="quit-confirm" class="overlay hidden">
+        <div class="popup">
+            <p class="popup-title funky">Quit?</p>
+            <p class="popup-text">Are you sure? You will lose all your progress.</p>
+            <div class="popup-buttons">
+                <button id="quit-yes" class="play-button danger">Yes, quit</button>
+                <button id="quit-no" class="play-button secondary">Keep playing</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
